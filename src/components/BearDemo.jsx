@@ -41,15 +41,23 @@ export function BearDemo() {
     }
   };
 
+  // Handle bear position updates
+  const handleBearPositionChange = (newPosition) => {
+    console.log('Bear position updated:', newPosition);
+    setBearPosition(newPosition);
+  };
+
   // Update camera position to follow the bear
   useEffect(() => {
-    // Camera follows bear with fixed offset
+    // Camera follows bear with fixed offset - third person view
     const cameraOffset = [0, 5, 8]; // Behind and above the bear
-    setCameraPosition([
+    const newCameraPosition = [
       bearPosition[0] + cameraOffset[0],
       bearPosition[1] + cameraOffset[1],
       bearPosition[2] + cameraOffset[2]
-    ]);
+    ];
+    console.log('Camera position updated:', newCameraPosition, 'Bear position:', bearPosition);
+    setCameraPosition(newCameraPosition);
   }, [bearPosition]);
 
   return (
@@ -88,7 +96,7 @@ export function BearDemo() {
           weapon="None"
           position={[0, 0, 0]}
           movement={movement}
-          onPositionChange={setBearPosition}
+          onPositionChange={handleBearPositionChange}
         />
 
         
