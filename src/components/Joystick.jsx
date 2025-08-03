@@ -10,29 +10,68 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
   const maxDistance = size / 2 - 20; // Leave some margin
 
   useEffect(() => {
-    if (baseRef.current) {
-      const rect = baseRef.current.getBoundingClientRect();
-      setBasePosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
-      });
-    }
-  }, []);
+    const updateBasePosition = () => {
+      if (baseRef.current) {
+        const rect = baseRef.current.getBoundingClientRect();
+        const newBasePosition = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+        setBasePosition(newBasePosition);
+        console.log('Base position updated:', newBasePosition);
+      }
+    };
+    
+    updateBasePosition();
+    
+    // Update position on window resize
+    window.addEventListener('resize', updateBasePosition);
+    
+    // Global touch event handlers for better mobile support
+    const handleGlobalTouchMove = (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        updateJoystickPosition(e);
+      }
+    };
+    
+    const handleGlobalTouchEnd = (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        setIsDragging(false);
+        setJoystickPosition({ x: 0, y: 0 });
+        onMove({ x: 0, y: 0 });
+      }
+    };
+    
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+    document.addEventListener('touchend', handleGlobalTouchEnd, { passive: false });
+    
+    return () => {
+      window.removeEventListener('resize', updateBasePosition);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [isDragging, onMove]);
 
   const handleTouchStart = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(true);
     updateJoystickPosition(e);
   };
 
   const handleTouchMove = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (isDragging) {
       updateJoystickPosition(e);
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
     setJoystickPosition({ x: 0, y: 0 });
     onMove({ x: 0, y: 0 });
@@ -59,8 +98,13 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-    const deltaX = clientX - basePosition.x;
-    const deltaY = clientY - basePosition.y;
+    // Get the joystick container position
+    const containerRect = baseRef.current.getBoundingClientRect();
+    const centerX = containerRect.left + containerRect.width / 2;
+    const centerY = containerRect.top + containerRect.height / 2;
+
+    const deltaX = clientX - centerX;
+    const deltaY = clientY - centerY;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
     let x, y;
@@ -83,6 +127,15 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
     const deadzone = 0.05;
     const finalX = Math.abs(normalizedX) > deadzone ? normalizedX : 0;
     const finalY = Math.abs(normalizedY) > deadzone ? normalizedY : 0;
+
+    // Debug logging to see what values we're getting
+    console.log('Joystick values:', { 
+      clientX, clientY, 
+      centerX, centerY,
+      deltaX, deltaY, 
+      normalizedX, normalizedY, 
+      finalX, finalY 
+    });
 
     onMove({ x: finalX, y: finalY });
   };
