@@ -9,7 +9,7 @@ export function BearDemo() {
   const [animation, setAnimation] = useState("Idle");
   const [movement, setMovement] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const [cameraPosition, setCameraPosition] = useState([0, -2, 12]); // Fixed camera offset
+  const [cameraPosition, setCameraPosition] = useState([0, 4, 18]); // Fixed camera offset
   const [bearPosition, setBearPosition] = useState([0, 0, 0]); // Track bear's actual position
 
   // Check if device is mobile
@@ -49,7 +49,7 @@ export function BearDemo() {
   // Update camera position to follow the bear
   useEffect(() => {
     // Camera follows bear with fixed offset - third person view (zoomed out with upward tilt)
-    const cameraOffset = [0, -2, 12]; // Lower than bear for upward tilt
+    const cameraOffset = [0, 4, 18]; // Lower than bear for upward tilt
     const newCameraPosition = [
       bearPosition[0] + cameraOffset[0],
       bearPosition[1] + cameraOffset[1],
