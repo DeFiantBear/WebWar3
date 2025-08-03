@@ -1,0 +1,145 @@
+import { useState, useRef, useEffect } from 'react';
+
+export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [joystickPosition, setJoystickPosition] = useState({ x: 0, y: 0 });
+  const [basePosition, setBasePosition] = useState({ x: 0, y: 0 });
+  const joystickRef = useRef(null);
+  const baseRef = useRef(null);
+
+  const maxDistance = size / 2 - 20; // Leave some margin
+
+  useEffect(() => {
+    if (baseRef.current) {
+      const rect = baseRef.current.getBoundingClientRect();
+      setBasePosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      });
+    }
+  }, []);
+
+  const handleTouchStart = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+    updateJoystickPosition(e);
+  };
+
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    if (isDragging) {
+      updateJoystickPosition(e);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    setJoystickPosition({ x: 0, y: 0 });
+    onMove({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    updateJoystickPosition(e);
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      updateJoystickPosition(e);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setJoystickPosition({ x: 0, y: 0 });
+    onMove({ x: 0, y: 0 });
+  };
+
+  const updateJoystickPosition = (e) => {
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const deltaX = clientX - basePosition.x;
+    const deltaY = clientY - basePosition.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    let x, y;
+    if (distance > maxDistance) {
+      const angle = Math.atan2(deltaY, deltaX);
+      x = Math.cos(angle) * maxDistance;
+      y = Math.sin(angle) * maxDistance;
+    } else {
+      x = deltaX;
+      y = deltaY;
+    }
+
+    setJoystickPosition({ x, y });
+
+    // Normalize values between -1 and 1
+    const normalizedX = x / maxDistance;
+    const normalizedY = -y / maxDistance; // Invert Y for intuitive control
+
+    onMove({ x: normalizedX, y: normalizedY });
+  };
+
+  // Position classes
+  const getPositionClass = () => {
+    switch (position) {
+      case 'bottom-left':
+        return 'bottom-4 left-4';
+      case 'bottom-right':
+        return 'bottom-4 right-4';
+      case 'top-left':
+        return 'top-4 left-4';
+      case 'top-right':
+        return 'top-4 right-4';
+      default:
+        return 'bottom-4 right-4';
+    }
+  };
+
+  return (
+    <div 
+      className={`fixed ${getPositionClass()} z-20 select-none`}
+      style={{ width: size, height: size }}
+    >
+      {/* Joystick Base */}
+      <div
+        ref={baseRef}
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full border-2 border-white/50"
+        style={{ width: size, height: size }}
+      />
+
+      {/* Joystick Handle */}
+      <div
+        ref={joystickRef}
+        className="absolute bg-white/80 backdrop-blur-sm rounded-full border-2 border-white shadow-lg transition-transform duration-100"
+        style={{
+          width: size * 0.4,
+          height: size * 0.4,
+          left: size / 2 - (size * 0.4) / 2 + joystickPosition.x,
+          top: size / 2 - (size * 0.4) / 2 + joystickPosition.y,
+          transform: isDragging ? 'scale(1.1)' : 'scale(1)',
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      />
+
+      {/* Center Dot */}
+      <div
+        className="absolute bg-white/60 rounded-full"
+        style={{
+          width: 8,
+          height: 8,
+          left: size / 2 - 4,
+          top: size / 2 - 4,
+        }}
+      />
+    </div>
+  );
+} 
