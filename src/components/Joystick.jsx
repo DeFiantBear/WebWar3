@@ -75,11 +75,16 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
 
     setJoystickPosition({ x, y });
 
-    // Normalize values between -1 and 1
+    // Normalize values between -1 and 1 with deadzone
     const normalizedX = x / maxDistance;
     const normalizedY = -y / maxDistance; // Invert Y for intuitive control
+    
+    // Apply deadzone to prevent jitter
+    const deadzone = 0.1;
+    const finalX = Math.abs(normalizedX) > deadzone ? normalizedX : 0;
+    const finalY = Math.abs(normalizedY) > deadzone ? normalizedY : 0;
 
-    onMove({ x: normalizedX, y: normalizedY });
+    onMove({ x: finalX, y: finalY });
   };
 
   // Position classes
@@ -113,13 +118,14 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
       {/* Joystick Handle */}
       <div
         ref={joystickRef}
-        className="absolute bg-white/80 backdrop-blur-sm rounded-full border-2 border-white shadow-lg transition-transform duration-100"
+        className="absolute bg-white/80 backdrop-blur-sm rounded-full border-2 border-white shadow-lg transition-all duration-150"
         style={{
           width: size * 0.4,
           height: size * 0.4,
           left: size / 2 - (size * 0.4) / 2 + joystickPosition.x,
           top: size / 2 - (size * 0.4) / 2 + joystickPosition.y,
-          transform: isDragging ? 'scale(1.1)' : 'scale(1)',
+          transform: isDragging ? 'scale(1.15)' : 'scale(1)',
+          boxShadow: isDragging ? '0 0 20px rgba(255,255,255,0.3)' : '0 4px 8px rgba(0,0,0,0.2)',
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

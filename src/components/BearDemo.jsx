@@ -41,8 +41,10 @@ export function BearDemo() {
   const handleJoystickMove = (joystickMovement) => {
     setMovement(joystickMovement);
     
-    // Auto-set animation based on movement
-    if (joystickMovement.x !== 0 || joystickMovement.y !== 0) {
+    // Auto-set animation based on movement with smooth transitions
+    const isMoving = Math.abs(joystickMovement.x) > 0.1 || Math.abs(joystickMovement.y) > 0.1;
+    
+    if (isMoving) {
       if (animation !== "Run" && animation !== "Run_Shoot") {
         setAnimation("Run");
       }
@@ -180,21 +182,6 @@ export function BearDemo() {
           weapon={weapon}
           position={[0, 0, 0]}
           movement={movement}
-        />
-
-        {/* Multiple Bears for Showcase */}
-        <CharacterBearGLTF
-          color="#ef4444"
-          animation="Run"
-          weapon="Pistol"
-          position={[-3, 0, 0]}
-        />
-        
-        <CharacterBearGLTF
-          color="#10b981"
-          animation="Idle"
-          weapon="Sword"
-          position={[3, 0, 0]}
         />
 
         {/* Controls */}
