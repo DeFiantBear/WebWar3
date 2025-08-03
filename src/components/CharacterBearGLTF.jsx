@@ -33,14 +33,24 @@ export function CharacterBearGLTF({
     
     // Handle movement with smooth rotation
     if (movement.x !== 0 || movement.y !== 0) {
-      const speed = 3; // Reduced speed for smoother movement
+      const speed = 4; // Movement speed
       const newX = currentPosition[0] + movement.x * speed * delta;
       const newZ = currentPosition[2] + movement.y * speed * delta;
       setCurrentPosition([newX, currentPosition[1], newZ]);
       
-      // Calculate rotation towards movement direction
+      // Calculate rotation towards movement direction (smooth)
       const targetRotation = Math.atan2(movement.x, movement.y);
-      setRotation(targetRotation);
+      
+      // Smooth rotation interpolation
+      const rotationSpeed = 8; // How fast the bear turns
+      const rotationDiff = targetRotation - rotation;
+      
+      // Handle rotation wrapping
+      let adjustedDiff = rotationDiff;
+      if (rotationDiff > Math.PI) adjustedDiff -= 2 * Math.PI;
+      if (rotationDiff < -Math.PI) adjustedDiff += 2 * Math.PI;
+      
+      setRotation(rotation + adjustedDiff * rotationSpeed * delta);
     }
   });
 

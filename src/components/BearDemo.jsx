@@ -42,7 +42,7 @@ export function BearDemo() {
     setMovement(joystickMovement);
     
     // Auto-set animation based on movement with smooth transitions
-    const isMoving = Math.abs(joystickMovement.x) > 0.1 || Math.abs(joystickMovement.y) > 0.1;
+    const isMoving = Math.abs(joystickMovement.x) > 0.05 || Math.abs(joystickMovement.y) > 0.05;
     
     if (isMoving) {
       if (animation !== "Run" && animation !== "Run_Shoot") {
