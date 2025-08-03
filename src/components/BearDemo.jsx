@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment } from "@react-three/drei";
+import { Environment, PerspectiveCamera } from "@react-three/drei";
 import { CharacterBearGLTF } from "./CharacterBearGLTF";
 import { Joystick } from "./Joystick";
 
@@ -43,7 +43,6 @@ export function BearDemo() {
 
   // Handle bear position updates
   const handleBearPositionChange = (newPosition) => {
-    console.log('Bear position updated:', newPosition);
     setBearPosition(newPosition);
   };
 
@@ -56,7 +55,6 @@ export function BearDemo() {
       bearPosition[1] + cameraOffset[1],
       bearPosition[2] + cameraOffset[2]
     ];
-    console.log('Camera position updated:', newCameraPosition, 'Bear position:', bearPosition);
     setCameraPosition(newCameraPosition);
   }, [bearPosition]);
 
@@ -66,11 +64,19 @@ export function BearDemo() {
       {/* 3D Scene */}
              <Canvas
          shadows
-         camera={{ position: cameraPosition, fov: 50 }}
          className="w-full h-full"
        >
-        {/* Lighting */}
-        <ambientLight intensity={0.4} />
+                 {/* Camera */}
+         <PerspectiveCamera
+           makeDefault
+           position={cameraPosition}
+           fov={50}
+           near={0.1}
+           far={1000}
+         />
+         
+         {/* Lighting */}
+         <ambientLight intensity={0.4} />
         <directionalLight
           position={[10, 10, 5]}
           intensity={1}
