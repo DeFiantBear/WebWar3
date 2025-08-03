@@ -9,7 +9,7 @@ export function BearDemo() {
   const [animation, setAnimation] = useState("Idle");
   const [movement, setMovement] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const [cameraPosition, setCameraPosition] = useState([0, 8, 6]); // Fixed camera offset
+  const [cameraPosition, setCameraPosition] = useState([0, 3, 8]); // Fixed camera offset
   const [bearPosition, setBearPosition] = useState([0, 0, 0]); // Track bear's actual position
 
   // Check if device is mobile
@@ -48,8 +48,8 @@ export function BearDemo() {
 
   // Update camera position to follow the bear
   useEffect(() => {
-    // Camera follows bear with fixed offset - third person view (looking down)
-    const cameraOffset = [0, 8, 6]; // Higher up and closer for top-down view
+    // Camera follows bear with fixed offset - third person view (slightly above with tilt)
+    const cameraOffset = [0, 3, 8]; // Slightly higher than bear, behind with good distance
     const newCameraPosition = [
       bearPosition[0] + cameraOffset[0],
       bearPosition[1] + cameraOffset[1],
@@ -70,10 +70,10 @@ export function BearDemo() {
          <PerspectiveCamera
            makeDefault
            position={cameraPosition}
-           fov={45}
+           fov={50}
            near={0.1}
            far={1000}
-           lookAt={[bearPosition[0], bearPosition[1] + 0.5, bearPosition[2]]}
+           lookAt={[bearPosition[0], bearPosition[1] + 1, bearPosition[2]]}
          />
          
          {/* Lighting */}
