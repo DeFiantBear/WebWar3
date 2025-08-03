@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, PerspectiveCamera } from "@react-three/drei";
+import { Environment, PerspectiveCamera, OrbitControls } from "@react-three/drei";
 import { CharacterBearGLTF } from "./CharacterBearGLTF";
 import { Joystick } from "./Joystick";
 
@@ -73,7 +73,17 @@ export function BearDemo() {
            fov={50}
            near={0.1}
            far={1000}
-           lookAt={[bearPosition[0], bearPosition[1] + 1, bearPosition[2]]}
+         />
+         
+         {/* Camera Controls - Drag to rotate camera around bear */}
+         <OrbitControls
+           target={[bearPosition[0], bearPosition[1] + 1, bearPosition[2]]}
+           enablePan={false}
+           enableZoom={true}
+           minDistance={3}
+           maxDistance={15}
+           maxPolarAngle={Math.PI * 0.8}
+           minPolarAngle={Math.PI * 0.1}
          />
          
          {/* Lighting */}
