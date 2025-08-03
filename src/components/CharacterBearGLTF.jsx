@@ -8,6 +8,7 @@ export function CharacterBearGLTF({
   weapon = "AK",
   position = [0, 0, 0],
   movement = { x: 0, y: 0 },
+  onPositionChange,
   ...props
 }) {
   const group = useRef();
@@ -36,7 +37,13 @@ export function CharacterBearGLTF({
       const speed = 5; // Increased movement speed for more responsiveness
       const newX = currentPosition[0] + movement.x * speed * delta;
       const newZ = currentPosition[2] + movement.y * speed * delta;
-      setCurrentPosition([newX, currentPosition[1], newZ]);
+      const newPosition = [newX, currentPosition[1], newZ];
+      setCurrentPosition(newPosition);
+      
+      // Report position change to parent for camera tracking
+      if (onPositionChange) {
+        onPositionChange(newPosition);
+      }
       
       // Calculate rotation towards movement direction (smooth)
       const targetRotation = Math.atan2(movement.x, movement.y);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment } from "@react-three/drei";
+import { Environment } from "@react-three/drei";
 import { CharacterBearGLTF } from "./CharacterBearGLTF";
 import { Joystick } from "./Joystick";
 
@@ -9,6 +9,8 @@ export function BearDemo() {
   const [animation, setAnimation] = useState("Idle");
   const [movement, setMovement] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
+  const [cameraPosition, setCameraPosition] = useState([0, 5, 8]); // Fixed camera offset
+  const [bearPosition, setBearPosition] = useState([0, 0, 0]); // Track bear's actual position
 
   // Check if device is mobile
   useEffect(() => {
@@ -39,15 +41,26 @@ export function BearDemo() {
     }
   };
 
+  // Update camera position to follow the bear
+  useEffect(() => {
+    // Camera follows bear with fixed offset
+    const cameraOffset = [0, 5, 8]; // Behind and above the bear
+    setCameraPosition([
+      bearPosition[0] + cameraOffset[0],
+      bearPosition[1] + cameraOffset[1],
+      bearPosition[2] + cameraOffset[2]
+    ]);
+  }, [bearPosition]);
+
   return (
     <div className="w-full h-screen bg-gradient-to-br from-blue-900 to-purple-900">
 
       {/* 3D Scene */}
-      <Canvas
-        shadows
-        camera={{ position: [5, 5, 5], fov: 50 }}
-        className="w-full h-full"
-      >
+             <Canvas
+         shadows
+         camera={{ position: cameraPosition, fov: 50 }}
+         className="w-full h-full"
+       >
         {/* Lighting */}
         <ambientLight intensity={0.4} />
         <directionalLight
@@ -75,15 +88,10 @@ export function BearDemo() {
           weapon="None"
           position={[0, 0, 0]}
           movement={movement}
+          onPositionChange={setBearPosition}
         />
 
-        {/* Controls */}
-        <OrbitControls
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          maxPolarAngle={Math.PI / 2}
-        />
+        
 
 
       </Canvas>
