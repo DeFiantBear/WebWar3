@@ -122,8 +122,8 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
     const normalizedX = x / maxDistance;
     const normalizedY = y / maxDistance; // Remove Y inversion for correct direction
     
-    // Apply smaller deadzone for better responsiveness
-    const deadzone = 0.05;
+    // Apply very small deadzone for maximum responsiveness
+    const deadzone = 0.02;
     const finalX = Math.abs(normalizedX) > deadzone ? normalizedX : 0;
     const finalY = Math.abs(normalizedY) > deadzone ? normalizedY : 0;
 

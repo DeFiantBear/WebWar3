@@ -29,11 +29,11 @@ export function CharacterBearGLTF({
 
   // Update animation time continuously - optimized for mobile
   useFrame((_, delta) => {
-    timeRef.current += delta * 4; // Slightly reduced for better mobile performance
+    timeRef.current += delta * 6; // Increased for faster walking animation
     
     // Handle movement with smooth rotation
     if (movement.x !== 0 || movement.y !== 0) {
-      const speed = 4; // Movement speed
+      const speed = 5; // Increased movement speed for more responsiveness
       const newX = currentPosition[0] + movement.x * speed * delta;
       const newZ = currentPosition[2] + movement.y * speed * delta;
       setCurrentPosition([newX, currentPosition[1], newZ]);
@@ -58,7 +58,7 @@ export function CharacterBearGLTF({
   const getArmRotation = (side) => {
     if (animation === "Run" || animation === "Run_Shoot") {
       const offset = side === "left" ? 0 : Math.PI;
-      return Math.sin(timeRef.current + offset) * 0.25; // Reduced rotation for smoother mobile
+      return Math.sin(timeRef.current + offset) * 0.35; // Increased rotation for more dynamic movement
     }
     return 0;
   };
@@ -66,7 +66,7 @@ export function CharacterBearGLTF({
   const getLegRotation = (side) => {
     if (animation === "Run" || animation === "Run_Shoot") {
       const offset = side === "left" ? Math.PI : 0;
-      return Math.sin(timeRef.current + offset) * 0.15; // Reduced rotation for smoother mobile
+      return Math.sin(timeRef.current + offset) * 0.25; // Increased rotation for more dynamic movement
     }
     return 0;
   };
