@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Environment, PerspectiveCamera, OrbitControls } from "@react-three/drei";
+import { Environment, PerspectiveCamera } from "@react-three/drei";
 import { CharacterBearGLTF } from "./CharacterBearGLTF";
 import { Joystick } from "./Joystick";
 
@@ -9,7 +9,7 @@ export function BearDemo() {
   const [animation, setAnimation] = useState("Idle");
   const [movement, setMovement] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const [cameraPosition, setCameraPosition] = useState([0, 2.5, 6]); // Fixed camera offset
+  const [cameraPosition, setCameraPosition] = useState([0, 4, 12]); // Fixed camera offset
   const [bearPosition, setBearPosition] = useState([0, 0, 0]); // Track bear's actual position
 
   // Check if device is mobile
@@ -48,8 +48,8 @@ export function BearDemo() {
 
   // Update camera position to follow the bear
   useEffect(() => {
-    // Camera follows bear with fixed offset - third person view (based on screenshot)
-    const cameraOffset = [0, 2.5, 6]; // Behind and slightly above, perfect third-person angle
+    // Camera follows bear with fixed offset - third person view (zoomed out with more tilt)
+    const cameraOffset = [0, 4, 12]; // Higher up and further back for more zoom and tilt
     const newCameraPosition = [
       bearPosition[0] + cameraOffset[0],
       bearPosition[1] + cameraOffset[1],
@@ -70,20 +70,10 @@ export function BearDemo() {
          <PerspectiveCamera
            makeDefault
            position={cameraPosition}
-           fov={50}
+           fov={45}
            near={0.1}
            far={1000}
-         />
-         
-         {/* Camera Controls - Drag to rotate camera around bear */}
-         <OrbitControls
-           target={[bearPosition[0], bearPosition[1] + 0.8, bearPosition[2]]}
-           enablePan={false}
-           enableZoom={true}
-           minDistance={4}
-           maxDistance={12}
-           maxPolarAngle={Math.PI * 0.7}
-           minPolarAngle={Math.PI * 0.2}
+           lookAt={[bearPosition[0], bearPosition[1] + 0.5, bearPosition[2]]}
          />
          
          {/* Lighting */}
