@@ -18,7 +18,6 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
           y: rect.top + rect.height / 2
         };
         setBasePosition(newBasePosition);
-        console.log('Base position updated:', newBasePosition);
       }
     };
     
@@ -121,21 +120,14 @@ export function Joystick({ onMove, size = 120, position = 'bottom-right' }) {
 
     // Normalize values between -1 and 1
     const normalizedX = x / maxDistance;
-    const normalizedY = -y / maxDistance; // Invert Y for intuitive control
+    const normalizedY = y / maxDistance; // Remove Y inversion for correct direction
     
     // Apply smaller deadzone for better responsiveness
     const deadzone = 0.05;
     const finalX = Math.abs(normalizedX) > deadzone ? normalizedX : 0;
     const finalY = Math.abs(normalizedY) > deadzone ? normalizedY : 0;
 
-    // Debug logging to see what values we're getting
-    console.log('Joystick values:', { 
-      clientX, clientY, 
-      centerX, centerY,
-      deltaX, deltaY, 
-      normalizedX, normalizedY, 
-      finalX, finalY 
-    });
+
 
     onMove({ x: finalX, y: finalY });
   };
