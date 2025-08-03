@@ -25,6 +25,7 @@ A React Three.js application featuring an animated 3D bear character with weapon
 - **Multiple Bears**: Showcase multiple characters with different configurations
 - **Performance Stats**: Optional FPS and performance monitoring
 - **3D Controls**: Orbit controls for camera manipulation
+- **Mobile Joystick**: Touch-friendly joystick for mobile movement control
 
 ## Technical Specifications
 
@@ -67,6 +68,16 @@ A React Three.js application featuring an animated 3D bear character with weapon
    npm run build
    ```
 
+## Mobile Controls
+
+The application includes a touch-friendly joystick that appears automatically on mobile devices:
+
+- **Joystick Position**: Bottom-left corner of the screen
+- **Movement**: Drag the joystick handle to move the bear character
+- **Auto-Animation**: Movement automatically triggers running animation
+- **Touch Support**: Works with both touch and mouse input
+- **Responsive**: Automatically detects mobile devices and shows joystick
+
 ## Usage
 
 ### Basic Character Usage
@@ -104,6 +115,8 @@ function MyComponent() {
 - `color` (string, default: "#3b82f6"): Primary color of the bear
 - `animation` (string, default: "Idle"): Animation state ("Idle", "Run", "Run_Shoot", "Hurt", "Dead")
 - `weapon` (string, default: "AK"): Weapon type ("None", "AK", "Pistol", "Shotgun", "Sword")
+- `position` (array, default: [0, 0, 0]): Initial position of the bear
+- `movement` (object, default: {x: 0, y: 0}): Movement vector for joystick control
 - `...props`: All standard Three.js group props
 
 ### SoundManager Props
@@ -119,6 +132,7 @@ src/
 ├── components/
 │   ├── CharacterBearGLTF.jsx    # Main bear character component
 │   ├── SoundManager.jsx         # Audio management component
+│   ├── Joystick.jsx             # Mobile joystick control component
 │   └── BearDemo.jsx             # Interactive demo scene
 ├── App.jsx                      # Main application component
 ├── main.jsx                     # Application entry point
