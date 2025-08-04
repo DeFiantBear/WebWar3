@@ -9,8 +9,8 @@ export const EnhancedJoystick = ({ onMove, onFire, onFireEnd }) => {
   const [joystickPosition, setJoystickPosition] = useState({ x: 0, y: 0 });
   const [containerRect, setContainerRect] = useState(null);
 
-  const deadzone = 0.02;
-  const maxDistance = 50;
+  const deadzone = 0.05;
+  const maxDistance = 60;
 
   useEffect(() => {
     const joystick = joystickRef.current;
@@ -44,7 +44,8 @@ export const EnhancedJoystick = ({ onMove, onFire, onFireEnd }) => {
     const magnitude = Math.min(distance / maxDistance, 1);
 
     if (magnitude > deadzone) {
-      const angle = Math.atan2(normalizedX, normalizedY);
+      // Fix angle calculation for proper movement direction
+      const angle = Math.atan2(normalizedX, -normalizedY);
       onMove?.({ x: normalizedX, y: normalizedY, angle, magnitude });
     } else {
       onMove?.({ x: 0, y: 0, angle: 0, magnitude: 0 });
@@ -151,13 +152,13 @@ export const EnhancedJoystick = ({ onMove, onFire, onFireEnd }) => {
     <div className="fixed bottom-4 left-4 z-50 flex gap-4">
       <div
         ref={joystickRef}
-        className="relative w-24 h-24 bg-gray-800 rounded-full border-2 border-gray-600 touch-none"
+        className="relative w-28 h-28 bg-gray-800 rounded-full border-2 border-gray-600 touch-none"
         style={{ touchAction: "none" }}
         onMouseDown={handleJoystickStart}
         onTouchStart={handleTouchStart}
       >
         <div
-          className="absolute w-8 h-8 bg-blue-500 rounded-full border-2 border-blue-300 transform -translate-x-1/2 -translate-y-1/2"
+          className="absolute w-10 h-10 bg-blue-500 rounded-full border-2 border-blue-300 transform -translate-x-1/2 -translate-y-1/2"
           style={{
             left: "50%",
             top: "50%",
@@ -168,7 +169,7 @@ export const EnhancedJoystick = ({ onMove, onFire, onFireEnd }) => {
 
       <div
         ref={fireButtonRef}
-        className={`w-16 h-16 rounded-full border-2 touch-none flex items-center justify-center text-white font-bold text-sm ${
+        className={`w-20 h-20 rounded-full border-2 touch-none flex items-center justify-center text-white font-bold text-sm ${
           isFirePressed
             ? "bg-red-600 border-red-400"
             : "bg-red-500 border-red-300"

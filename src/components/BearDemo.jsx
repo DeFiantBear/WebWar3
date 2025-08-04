@@ -57,6 +57,7 @@ export const BearDemo = () => {
     angle: () => joystickState.angle,
     isJoystickPressed: () => joystickState.isJoystickPressed,
     isPressed: (button) => button === "fire" && joystickState.isFirePressed,
+    magnitude: () => joystickState.magnitude,
   };
 
   return (

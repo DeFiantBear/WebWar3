@@ -1,62 +1,58 @@
+import { Instance, Instances } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
-import * as THREE from "three";
+import { isHost } from "playroomkit";
+import { useEffect, useMemo, useRef } from "react";
+import { Color, MathUtils, Vector3 } from "three";
 
-export const BulletHit = ({ id, position, onEnded, ...props }) => {
-  const group = useRef();
-  const [particles, setParticles] = useState(() => {
-    const particleCount = 20;
-    return Array.from({ length: particleCount }, (_, i) => ({
-      id: i,
-      position: new THREE.Vector3(
-        (Math.random() - 0.5) * 0.5,
-        (Math.random() - 0.5) * 0.5,
-        (Math.random() - 0.5) * 0.5
-      ),
-      velocity: new THREE.Vector3(
-        (Math.random() - 0.5) * 2,
-        Math.random() * 2,
-        (Math.random() - 0.5) * 2
-      ),
-      life: 1.0,
-      decay: 0.02 + Math.random() * 0.03,
-    }));
-  });
+const bulletHitcolor = new Color("red");
+bulletHitcolor.multiplyScalar(12);
 
+const AnimatedBox = ({ scale, target, speed }) => {
+  const ref = useRef();
   useFrame((_, delta) => {
-    if (!group.current) return;
-
-    setParticles((prevParticles) => {
-      const updatedParticles = prevParticles.map((particle) => ({
-        ...particle,
-        position: particle.position.clone().add(
-          particle.velocity.clone().multiplyScalar(delta)
-        ),
-        life: particle.life - particle.decay,
-      }));
-
-      const aliveParticles = updatedParticles.filter((p) => p.life > 0);
-
-      if (aliveParticles.length === 0) {
-        setTimeout(() => onEnded?.(id), 100);
-      }
-
-      return aliveParticles;
-    });
+    if (ref.current.scale.x > 0) {
+      ref.current.scale.x =
+        ref.current.scale.y =
+        ref.current.scale.z -=
+          speed * delta;
+    }
+    ref.current.position.lerp(target, speed);
   });
+  return <Instance ref={ref} scale={scale} position={[0, 0, 0]} />;
+};
+
+export const BulletHit = ({ nb = 100, position, onEnded }) => {
+  const boxes = useMemo(
+    () =>
+      Array.from({ length: nb }, () => ({
+        target: new Vector3(
+          MathUtils.randFloat(-0.6, 0.6),
+          MathUtils.randFloat(-0.6, 0.6),
+          MathUtils.randFloat(-0.6, 0.6)
+        ),
+        scale: 0.1, //MathUtils.randFloat(0.03, 0.09),
+        speed: MathUtils.randFloat(0.1, 0.3),
+      })),
+    [nb]
+  );
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (isHost()) {
+        onEnded();
+      }
+    }, 500);
+  }, []);
 
   return (
-    <group {...props} ref={group} position={[position.x, position.y, position.z]}>
-      {particles.map((particle) => (
-        <mesh key={particle.id} position={particle.position}>
-          <sphereGeometry args={[0.05, 4, 4]} />
-          <meshBasicMaterial
-            color="orange"
-            transparent
-            opacity={particle.life}
-          />
-        </mesh>
-      ))}
+    <group position={[position.x, position.y, position.z]}>
+      <Instances>
+        <boxGeometry />
+        <meshStandardMaterial toneMapped={false} color={bulletHitcolor} />
+        {boxes.map((box, i) => (
+          <AnimatedBox key={i} {...box} />
+        ))}
+      </Instances>
     </group>
   );
-}; 
+};

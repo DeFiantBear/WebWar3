@@ -2,11 +2,14 @@ import { Billboard, CameraControls, Text } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody, vec3 } from "@react-three/rapier";
 import { useEffect, useRef, useState } from "react";
-import { CharacterBearGLTF } from "./CharacterBearGLTF";
-
+import { CharacterSoldier } from "./CharacterSoldier";
 const MOVEMENT_SPEED = 202;
 const FIRE_RATE = 380;
-const WEAPON_OFFSET = { x: -0.2, y: 1.4, z: 0.8 };
+export const WEAPON_OFFSET = {
+  x: -0.2,
+  y: 1.4,
+  z: 0.8,
+};
 
 export const CharacterController = ({
   joystick,
@@ -43,7 +46,7 @@ export const CharacterController = ({
 
   useEffect(() => {
     if (dead) {
-      const audio = new Audio("/audios/dead.mp3");
+      const audio = new Audio("/dead.mp3");
       audio.volume = 0.5;
       audio.play().catch(() => {});
     }
@@ -51,7 +54,7 @@ export const CharacterController = ({
 
   useEffect(() => {
     if (health < 100 && health > 0) {
-      const audio = new Audio("/audios/hurt.mp3");
+      const audio = new Audio("/hurt.mp3");
       audio.volume = 0.4;
       audio.play().catch(() => {});
     }
@@ -85,22 +88,30 @@ export const CharacterController = ({
       return;
     }
 
-    // Update player position based on joystick state
+    // Get joystick data
     const angle = joystick?.angle?.();
-    if (joystick?.isJoystickPressed?.() && angle) {
+    const isMoving = joystick?.isJoystickPressed?.();
+    const isFiring = joystick?.isPressed?.("fire");
+
+    // Handle movement
+    if (isMoving && angle !== undefined) {
       setAnimation("Run");
       
-      // Only update rotation if angle actually changed
+      // Update character rotation to face movement direction
       if (Math.abs(angle - lastAngle.current) > 0.01) {
         character.current.rotation.y = angle;
         lastAngle.current = angle;
       }
 
-      // move character in its own direction
+      // Apply movement impulse in the direction the character is facing
+      // Use joystick magnitude for variable speed
+      const joystickMagnitude = joystick?.magnitude?.() || 1;
+      const speedMultiplier = Math.max(0.3, joystickMagnitude);
+      
       const impulse = {
-        x: Math.sin(angle) * MOVEMENT_SPEED * delta,
+        x: Math.sin(angle) * MOVEMENT_SPEED * delta * speedMultiplier,
         y: 0,
-        z: Math.cos(angle) * MOVEMENT_SPEED * delta,
+        z: Math.cos(angle) * MOVEMENT_SPEED * delta * speedMultiplier,
       };
 
       rigidbody.current.applyImpulse(impulse, true);
@@ -108,15 +119,15 @@ export const CharacterController = ({
       setAnimation("Idle");
     }
 
-    // Check if fire button is pressed
-    if (joystick?.isPressed?.("fire")) {
-      // fire
+    // Handle shooting
+    if (isFiring) {
+      // Set shooting animation
       setAnimation(
-        joystick.isJoystickPressed() && angle ? "Run_Shoot" : "Idle_Shoot"
+        isMoving && angle !== undefined ? "Run_Shoot" : "Idle_Shoot"
       );
       
-      // Make sure bear faces the direction he's shooting
-      if (angle && Math.abs(angle - lastAngle.current) > 0.01) {
+      // Ensure character faces shooting direction
+      if (angle !== undefined && Math.abs(angle - lastAngle.current) > 0.01) {
         character.current.rotation.y = angle;
         lastAngle.current = angle;
       }
@@ -124,10 +135,22 @@ export const CharacterController = ({
       if (userPlayer) {
         if (Date.now() - lastShoot.current > FIRE_RATE) {
           lastShoot.current = Date.now();
+          
+          // Get current character position and rotation
+          const currentPos = vec3(rigidbody.current.translation());
+          const shootAngle = angle !== undefined ? angle : character.current.rotation.y;
+          
+          // Add weapon offset to bullet spawn position
+          const bulletSpawnPos = {
+            x: currentPos.x + Math.sin(shootAngle) * WEAPON_OFFSET.z,
+            y: currentPos.y + WEAPON_OFFSET.y,
+            z: currentPos.z + Math.cos(shootAngle) * WEAPON_OFFSET.z,
+          };
+          
           const newBullet = {
             id: `bear-${Date.now()}`,
-            position: vec3(rigidbody.current.translation()),
-            angle: angle || character.current.rotation.y,
+            position: bulletSpawnPos,
+            angle: shootAngle,
             player: "bear",
           };
           onFire?.(newBullet);
@@ -157,6 +180,15 @@ export const CharacterController = ({
     }
   };
 
+  const controls = useRef();
+  const directionalLight = useRef();
+
+  useEffect(() => {
+    if (character.current && userPlayer) {
+      directionalLight.current.target = character.current;
+    }
+  }, [character.current]);
+
   return (
     <group {...props} ref={group}>
       {userPlayer && <CameraControls ref={controls} />}
@@ -178,7 +210,7 @@ export const CharacterController = ({
       >
         <PlayerInfo health={health} deaths={deaths} kills={kills} color={color} />
         <group ref={character}>
-          <CharacterBearGLTF
+          <CharacterSoldier
             color={color}
             animation={animation}
             weapon={weapon}
@@ -236,17 +268,36 @@ const PlayerInfo = ({ health, deaths, kills, color }) => (
   </Billboard>
 );
 
-const Crosshair = (props) => (
-  <group {...props}>
-    {[1, 2, 3, 4.5, 6.5, 9].map((distance, index) => (
-      <mesh key={distance} position-z={distance}>
+const Crosshair = (props) => {
+  return (
+    <group {...props}>
+      <mesh position-z={1}>
         <boxGeometry args={[0.05, 0.05, 0.05]} />
-        <meshBasicMaterial 
-          color="black" 
-          transparent 
-          opacity={0.9 - index * 0.1} 
-        />
+        <meshBasicMaterial color="black" transparent opacity={0.9} />
       </mesh>
-    ))}
-  </group>
-); 
+      <mesh position-z={2}>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshBasicMaterial color="black" transparent opacity={0.85} />
+      </mesh>
+      <mesh position-z={3}>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshBasicMaterial color="black" transparent opacity={0.8} />
+      </mesh>
+
+      <mesh position-z={4.5}>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshBasicMaterial color="black" opacity={0.7} transparent />
+      </mesh>
+
+      <mesh position-z={6.5}>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshBasicMaterial color="black" opacity={0.6} transparent />
+      </mesh>
+
+      <mesh position-z={9}>
+        <boxGeometry args={[0.05, 0.05, 0.05]} />
+        <meshBasicMaterial color="black" opacity={0.2} transparent />
+      </mesh>
+    </group>
+  );
+};

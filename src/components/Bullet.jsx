@@ -1,53 +1,61 @@
-import { useFrame } from "@react-three/fiber";
 import { RigidBody, vec3 } from "@react-three/rapier";
-import { useRef } from "react";
+import { isHost } from "playroomkit";
+import { useEffect, useRef } from "react";
+import { MeshBasicMaterial } from "three";
+import { WEAPON_OFFSET } from "./CharacterController";
 
-export const Bullet = ({ id, position, angle, player, onHit, ...props }) => {
+const BULLET_SPEED = 20;
+
+const bulletMaterial = new MeshBasicMaterial({
+  color: "hotpink",
+  toneMapped: false,
+});
+
+bulletMaterial.color.multiplyScalar(42);
+
+export const Bullet = ({ player, angle, position, onHit }) => {
   const rigidbody = useRef();
-  const startTime = useRef(Date.now());
-  
-  const BULLET_SPEED = 20;
-  const BULLET_LIFETIME = 3000;
 
-  useFrame((_, delta) => {
-    if (!rigidbody.current) return;
-
-    const impulse = {
-      x: Math.sin(angle) * BULLET_SPEED * delta,
+  useEffect(() => {
+    const audio = new Audio("/audios/rifle.mp3");
+    audio.play();
+    const velocity = {
+      x: Math.sin(angle) * BULLET_SPEED,
       y: 0,
-      z: Math.cos(angle) * BULLET_SPEED * delta,
+      z: Math.cos(angle) * BULLET_SPEED,
     };
-    rigidbody.current.applyImpulse(impulse, true);
 
-    if (Date.now() - startTime.current > BULLET_LIFETIME) {
-      onHit?.(vec3(rigidbody.current.translation()));
-    }
-  });
+    rigidbody.current.setLinvel(velocity, true);
+  }, []);
 
   return (
-    <group {...props}>
-      <RigidBody
-        ref={rigidbody}
-        colliders="ball"
-        args={[0.1]}
-        position={[position.x, position.y + 1.5, position.z]}
-        type="dynamic"
-        userData={{
-          type: "bullet",
-          damage: 25,
-          player: player,
-        }}
-        onIntersectionEnter={({ other }) => {
-          if (other.rigidBody?.userData?.type !== "bullet") {
-            onHit?.(vec3(rigidbody.current.translation()));
-          }
-        }}
+    <group position={[position.x, position.y, position.z]} rotation-y={angle}>
+      <group
+        position-x={WEAPON_OFFSET.x}
+        position-y={WEAPON_OFFSET.y}
+        position-z={WEAPON_OFFSET.z}
       >
-        <mesh>
-          <sphereGeometry args={[0.1, 8, 8]} />
-          <meshBasicMaterial color="yellow" />
-        </mesh>
-      </RigidBody>
+        <RigidBody
+          ref={rigidbody}
+          gravityScale={0}
+          onIntersectionEnter={(e) => {
+            if (isHost() && e.other.rigidBody.userData?.type !== "bullet") {
+              rigidbody.current.setEnabled(false);
+              onHit(vec3(rigidbody.current.translation()));
+            }
+          }}
+          sensor
+          userData={{
+            type: "bullet",
+            player,
+            damage: 10,
+          }}
+        >
+          <mesh position-z={0.25} material={bulletMaterial} castShadow>
+            <boxGeometry args={[0.05, 0.05, 0.5]} />
+          </mesh>
+        </RigidBody>
+      </group>
     </group>
   );
-}; 
+};
