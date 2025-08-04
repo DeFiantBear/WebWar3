@@ -2,7 +2,7 @@ import { Billboard, CameraControls, Text } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody, vec3 } from "@react-three/rapier";
 import { useEffect, useRef, useState } from "react";
-import { CharacterSoldier } from "./CharacterSoldier";
+import { CharacterBearGLTF } from "./CharacterBearGLTF";
 const MOVEMENT_SPEED = 202;
 const FIRE_RATE = 380;
 export const WEAPON_OFFSET = {
@@ -201,7 +201,7 @@ export const CharacterController = ({
       >
         <PlayerInfo health={health} deaths={deaths} kills={kills} color={color} />
         <group ref={character}>
-          <CharacterSoldier
+          <CharacterBearGLTF
             color={color}
             animation={animation}
             weapon={weapon}
