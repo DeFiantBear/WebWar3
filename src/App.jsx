@@ -1,11 +1,7 @@
-import { BearDemo } from './components/BearDemo';
+import { BearDemo } from "./components/BearDemo";
 
 function App() {
-  return (
-    <div className="App">
-      <BearDemo />
-    </div>
-  );
+  return <BearDemo />;
 }
 
 export default App; 

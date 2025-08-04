@@ -13,7 +13,6 @@ export function CharacterBearGLTF({
 }) {
   const group = useRef();
   const timeRef = useRef(0);
-  const [currentPosition, setCurrentPosition] = useState([...position]);
   const [rotation, setRotation] = useState(0);
 
   // Optimized materials - created once and reused
@@ -32,19 +31,8 @@ export function CharacterBearGLTF({
   useFrame((_, delta) => {
     timeRef.current += delta * 6; // Increased for faster walking animation
     
-    // Handle movement with smooth rotation
+    // Handle rotation based on movement direction
     if (movement.x !== 0 || movement.y !== 0) {
-      const speed = 5; // Increased movement speed for more responsiveness
-      const newX = currentPosition[0] + movement.x * speed * delta;
-      const newZ = currentPosition[2] + movement.y * speed * delta;
-      const newPosition = [newX, currentPosition[1], newZ];
-      setCurrentPosition(newPosition);
-      
-      // Report position change to parent for camera tracking
-      if (onPositionChange) {
-        onPositionChange(newPosition);
-      }
-      
       // Calculate rotation towards movement direction (smooth)
       const targetRotation = Math.atan2(movement.x, movement.y);
       
@@ -180,7 +168,7 @@ export function CharacterBearGLTF({
   // Optimized bear - reduced complexity for mobile
   // Bear stomach area optimized - no collision issues
   return (
-    <group {...props} dispose={null} ref={group} position={currentPosition} rotation={[0, rotation, 0]}>
+    <group {...props} dispose={null} ref={group} position={position} rotation={[0, rotation, 0]}>
       {/* Main Body - Core structure */}
       <mesh castShadow receiveShadow position={[0, 1.3, 0]}>
         <boxGeometry args={[1.2, 1.2, 0.8]} />
