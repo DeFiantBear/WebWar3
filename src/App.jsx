@@ -3,7 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { Suspense, useState } from "react";
 import { CharacterController } from "./components/CharacterController";
-import { EnhancedJoystick } from "./EnhancedJoystick";
+import { EnhancedJoystick } from "./components/EnhancedJoystick";
 import { Bullet } from "./components/Bullet";
 import { BulletHit } from "./components/BulletHit";
 import { Map } from "./components/Map";
@@ -103,5 +103,3 @@ export default function App() {
     </div>
   );
 }
-
-export default App;

@@ -180,15 +180,6 @@ export const CharacterController = ({
     }
   };
 
-  const controls = useRef();
-  const directionalLight = useRef();
-
-  useEffect(() => {
-    if (character.current && userPlayer) {
-      directionalLight.current.target = character.current;
-    }
-  }, [character.current]);
-
   return (
     <group {...props} ref={group}>
       {userPlayer && <CameraControls ref={controls} />}
